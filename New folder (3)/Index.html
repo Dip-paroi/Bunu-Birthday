@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Special Birthday Animation</title>
+  <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0d1117;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            position: relative;
+        }
+        
+        /* Clock styles */
+        .clock {
+            width: 200px;
+            height: 200px;
+            border: 8px solid #58a6ff;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+        }
+        
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: #58a6ff;
+        }
+        
+        .hour-hand {
+            width: 6px;
+            height: 60px;
+            margin-left: -3px;
+            animation: rotate 12s linear infinite;
+        }
+        
+        .minute-hand {
+            width: 4px;
+            height: 80px;
+            margin-left: -2px;
+            animation: rotate 6s linear infinite;
+        }
+        
+        /* Birthday message styles */
+        .birthday-message {
+            font-size: 3rem;
+            margin-top: 30px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1s ease;
+        }
+        
+        .visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* Emoji rain styles */
+        .emoji {
+            position: absolute;
+            font-size: 24px;
+            animation: fall linear forwards;
+            z-index: -1;
+        }
+        
+        /* Animation keyframes */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        
+        /* Clock strike effect */
+        .strike {
+            animation: strike 0.5s ease-out;
+        }
+        
+        @keyframes strike {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Final display styles */
+        .final-display {
+            display: none;
+            text-align: center;
+        }
+        
+        .final-display img {
+            max-width: 300px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+        }
+        
+        .emoji-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        /* Music control */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(88, 166, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="clock-animation">
+      <div class="clock">
+        <div class="hand hour-hand"></div>
+        <div class="hand minute-hand"></div>
+      </div>
+      <div id="clock-text">Time is ticking...</div>
+    </div>
+
+    <div id="birthday-message" class="birthday-message hidden">
+      🎉 Happy Birthday Bunu 🎂
+    </div>
+
+    <div id="final-display" class="final-display">
+      <img id="birthday-image" src="sraboni.jpg" alt="Birthday Image" />
+      <h1>🎉 Happy Birthday Bunu 🎂</h1>
+      <p>Wishing you a wonderful day!</p>
+    </div>
+  </div>
+
+  <div class="emoji-container" id="emoji-container"></div>
+
+  <div class="music-control" id="music-control">🔊</div>
+
+  <!-- Audio Files -->
+  <audio id="ticking-sound" src="clock ticking sound.mp3" preload="auto"></audio>
+  <audio id="clock-strike" src="" preload="auto"></audio>
+  <audio id="birthday-music" src="birthday song.mp3" preload="auto"></audio>
+
+  <script>
+    const tickingSound = document.getElementById('ticking-sound');
+    const clockStrike = document.getElementById('clock-strike');
+    const birthdayMusic = document.getElementById('birthday-music');
+    const musicControl = document.getElementById('music-control');
+    let musicPlaying = false;
+
+    function startAnimation() {
+      // Start ticking sound
+      tickingSound.loop = true;
+      tickingSound.volume = 0.5;
+      tickingSound.play();
+
+      // After 1.5 seconds, start 12 o'clock strike
+      setTimeout(() => {
+        tickingSound.pause();
+        document.querySelector('.clock').classList.add('strike');
+        document.getElementById('clock-text').textContent = "It's 12 o'clock!";
+
+        // Strike 5 times at 150ms interval
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            clockStrike.currentTime = 0;
+            clockStrike.volume = 0.7;
+            clockStrike.play();
+            document.querySelector('.clock').classList.remove('strike');
+            void document.querySelector('.clock').offsetWidth;
+            document.querySelector('.clock').classList.add('strike');
+          }, i * 150);
+        }
+
+        // After strike, show message and music
+        setTimeout(() => {
+          document.getElementById('clock-animation').classList.add('hidden');
+          document.getElementById('birthday-message').classList.remove('hidden');
+          document.getElementById('birthday-message').classList.add('visible');
+
+          birthdayMusic.loop = true;
+          birthdayMusic.volume = 0.8;
+          birthdayMusic.play();
+          musicPlaying = true;
+          musicControl.textContent = '🔊';
+
+          startEmojiRain();
+
+          setTimeout(() => {
+            document.getElementById('birthday-message').classList.add('hidden');
+            document.getElementById('final-display').style.display = 'block';
+          }, 3000);
+        }, 1000); // 5 strikes * 150ms = 750ms ~ 1s wait
+      }, 1500); // 1.5 second delay before clock strikes
+    }
+
+    // Music Control
+    musicControl.addEventListener('click', () => {
+      if (musicPlaying) {
+        birthdayMusic.pause();
+        musicControl.textContent = '🔇';
+      } else {
+        birthdayMusic.play();
+        musicControl.textContent = '🔊';
+      }
+      musicPlaying = !musicPlaying;
+    });
+
+    // User interaction to start
+    document.body.addEventListener('click', function initAudio() {
+      startAnimation();
+      document.body.removeEventListener('click', initAudio);
+    }, { once: true });
+
+    // Emoji Rain
+    function startEmojiRain() {
+      const emojis = ['❤', '🎉', '🎂', '🎁', '🥳', '✨', '🎈', '💝', '🌸', '🌟'];
+      const container = document.getElementById('emoji-container');
+      setInterval(() => {
+        const emoji = document.createElement('div');
+        emoji.classList.add('emoji');
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = Math.random() * 100 + 'vw';
+        emoji.style.animationDuration = Math.random() * 3 + 2 + 's';
+        container.appendChild(emoji);
+        setTimeout(() => emoji.remove(), 5000);
+      }, 100);
+    }
+  </script>
+</body>
+</html>
